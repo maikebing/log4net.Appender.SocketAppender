@@ -68,23 +68,30 @@ namespace log4net.Appender
         private void AppendLog(LoggingEvent loggingEvent)
         {
             var rendered = string.Empty;
-
-            if (_socket.Connected)
+            try
             {
-                rendered = RenderLoggingEvent(loggingEvent);
-
-                var msg = Encoding.UTF8.GetBytes(rendered);
-
-                var bytesSent = _socket.Send(msg);
-
-                if (DebugMode)
+                if (_socket.Connected)
                 {
-                    Console.WriteLine("- Bytes sent: " + bytesSent);
+                    rendered = RenderLoggingEvent(loggingEvent);
+
+                    var msg = Encoding.UTF8.GetBytes(rendered);
+
+                    var bytesSent = _socket.Send(msg, SocketFlags.None );
+
+                    if (DebugMode)
+                    {
+                        Console.WriteLine("- Bytes sent: " + bytesSent);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("[UNSUCCESSFULL]:: " + rendered);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("[UNSUCCESSFULL]:: " + rendered);
+                Console.WriteLine("[UNSUCCESSFULL]:: " + ex.Message+ex.StackTrace);
+                
             }
         }
 
